@@ -1,0 +1,23 @@
+{
+  "name": "storefront",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigreader/bootcamp-storefront.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bigreader/bootcamp-storefront/issues"
+  },
+  "homepage": "https://github.com/bigreader/bootcamp-storefront#readme",
+  "dependencies": {
+    "inquirer": "^6.3.1",
+    "mysql": "^2.16.0"
+  }
+}
