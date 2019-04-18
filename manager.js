@@ -180,3 +180,64 @@ function restock() {
 		});
 	});
 }
+
+
+function addProduct() {
+	const query = "SELECT department_id, department_name FROM departments";
+	db.query(query, (err, data) => {
+
+		inquirer.prompt([{
+			name: 'product_name',
+			message: 'Enter the product name:'
+		}, {
+			name: 'price',
+			type: 'number',
+			message: 'Enter the price:',
+			transformer: answer => '$'+answer,
+			validate: answer => {
+				if (!Number.isInteger(answer*100)) return 'Sub-penny denominations are not supported.';
+				return true;
+			}
+		}, {
+			name: 'department_id',
+			type: 'list',
+			message: 'Choose a department:',
+			choices: data.map(row => {
+				return {
+					value: row.department_id,
+					name: row.department_name
+				}
+			})
+		}]).then(answers => {
+			db.query("INSERT INTO products SET ?", answers, (err) => {
+				if (err) throw err;
+
+				console.log('Product added!');
+				console.log();
+				menu();
+
+			});
+
+		});
+
+	});
+	
+}
+
+
+function addDepartment() {
+	inquirer.prompt([{
+		name: 'department_name',
+		message: 'Enter the department name:'
+	}]).then(answers => {
+		db.query("INSERT INTO departments SET ?", answers, (err) => {
+			if (err) throw err;
+
+			console.log('Department added!');
+			console.log();
+			menu();
+
+		});
+
+	});
+}
