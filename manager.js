@@ -24,8 +24,9 @@ function menu() {
 		choices: [
 		'View Products for Sale',
 		'View Low Inventory',
-		'Add to Inventory',
+		'Restock',
 		'Add New Product',
+		'Add New Department',
 		new inquirer.Separator(),
 		'Exit'
 		]
@@ -46,6 +47,10 @@ function menu() {
 
 			case 'Add New Product':
 			addProduct();
+			break;
+
+			case 'Add New Department':
+			addDepartment();
 			break;
 
 			case 'Exit':
@@ -97,12 +102,81 @@ function listLow(limit) {
 	});
 }
 
+function restock() {
+	const query =
+	"SELECT product_id, product_name, stock, products.department_id AS department_id, department_name FROM products\
+	LEFT JOIN departments ON products.department_id = departments.department_id\
+	ORDER BY department_id, stock ASC, product_name";
+	db.query(query, (err, data) => {
+		if (err) throw err;
 
+		var choices = [];
+		var lastDeptID = '';
+		data.forEach(row => {
+			if (row.department_id !== lastDeptID) {
+				choices.push(new inquirer.Separator(`[${row.department_name}]`));
+				lastDeptID = row.department_id;
+			}
+			if (row.stock > 0) {
+				choices.push({
+					value: row,
+					name: `${row.product_name} x${row.stock}`,
+					short: row.product_name
+				});
+			} else {
+				choices.push({
+					value: row,
+					name: `${row.product_name} [out of stock]`,
+					short: row.product_name
+				});
+			}
+		});
+		choices.push(new inquirer.Separator());
+		choices.push({
+			value: 'menu',
+			name: 'Cancel'
+		});
 
+		inquirer.prompt([{
+			name: 'product',
+			type: 'list',
+			message: 'What product would you like to stock?',
+			choices: choices
+		}, {
+			when: answers => answers.product !== 'menu',
+			name: 'quantity',
+			type: 'number',
+			message: 'How many would you like to stock?',
+			validate: (answer, answers) => {
+				if (!Number.isInteger(answer)) return 'Please enter an integer quantity.';
+				if (answer <= 0) return 'Please enter a positive quantity.';
+				return true;
+			}
+		}]).then(answers => {
+			if (answers.product === 'menu') {
+				menu();
+				return;
+			}
 
+			const query = "UPDATE products SET stock = stock+? WHERE product_id = ?";
+			const vars = [answers.quantity, answers.product.product_id];
+			db.query(query, vars, (err) => {
+				if (err) throw err;
 
-
-
-
-
-
+				console.log(`${answers.product.product_name} restocked to ${answers.product.stock + answers.quantity}!`);
+				console.log();
+				inquirer.prompt([{
+					name: 'again',
+					type: 'confirm',
+					message: 'Restock another product?'
+				}]).then(answers => {
+					if (answers.again) {
+						restock();
+					} else {
+						menu();
+					}
+				});
+			});
+		});
+	});
+}

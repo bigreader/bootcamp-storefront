@@ -51,12 +51,7 @@ function menu() {
 			name: 'product',
 			type: 'list',
 			message: 'What product would you like to buy?',
-			choices: choices,
-			validate: answer => {
-				console.log(answer);
-				if (answer.stock == 0) return 'This product is out of stock.';
-				return true;
-			}
+			choices: choices
 		}, {
 			when: answers => answers.product !== 'exit',
 			name: 'quantity',
