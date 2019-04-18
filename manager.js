@@ -61,7 +61,7 @@ function menu() {
 	});
 }
 
-
+// list all products with more details
 function listAll() {
 	const query =
 	"SELECT product_id, product_name, stock, price, products.department_id AS department_id, department_name FROM products\
@@ -84,6 +84,7 @@ function listAll() {
 	});
 }
 
+// list products with low stock, sorted ascending
 function listLow(limit) {
 	const query =
 	"SELECT product_id, product_name, stock, products.department_id AS department_id, department_name FROM products\
@@ -102,6 +103,7 @@ function listLow(limit) {
 	});
 }
 
+// select a product and add stock
 function restock() {
 	const query =
 	"SELECT product_id, product_name, stock, products.department_id AS department_id, department_name FROM products\
@@ -181,7 +183,7 @@ function restock() {
 	});
 }
 
-
+// add a new product with name, price and chosen department
 function addProduct() {
 	const query = "SELECT department_id, department_name FROM departments";
 	db.query(query, (err, data) => {
@@ -224,7 +226,7 @@ function addProduct() {
 	
 }
 
-
+// add department by name
 function addDepartment() {
 	inquirer.prompt([{
 		name: 'department_name',

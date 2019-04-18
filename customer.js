@@ -16,6 +16,7 @@ db.connect(err => {
 	menu();
 });
 
+// main menu
 function menu() {
 	const query =
 	"SELECT product_id, product_name, stock, price, products.department_id AS department_id, department_name FROM products\
@@ -24,20 +25,24 @@ function menu() {
 	db.query(query, (err, data) => {
 		if (err) throw err;
 
+		// build choices list for inquirer from product results
 		var choices = [];
 		var lastDeptID = '';
 		data.forEach(row => {
 			if (row.department_id !== lastDeptID) {
+				// we've reached a new department, add a separator
 				choices.push(new inquirer.Separator(`[${row.department_name}]`));
 				lastDeptID = row.department_id;
 			}
 			if (row.stock > 0) {
+				// add product to the list
 				choices.push({
 					value: row,
 					name: `${row.product_name} ($${row.price})`,
 					short: row.product_name
 				});
 			} else {
+				// add out of stock product as unselectable separator
 				choices.push(new inquirer.Separator(`${row.product_name} [out of stock]`));
 			}
 		});
@@ -46,6 +51,7 @@ function menu() {
 			value: 'exit',
 			name: 'Exit'
 		});
+		// exit value skips following questions and ends the program
 
 		inquirer.prompt([{
 			name: 'product',
@@ -82,6 +88,7 @@ function menu() {
 				return;
 			}
 
+			// reduce stock by quantity, increase sales by total
 			const query = "UPDATE products SET stock = stock-?, sales = sales+price*? WHERE product_id = ?";
 			const vars = [answers.quantity, answers.quantity, answers.product.product_id];
 			db.query(query, vars, (err) => {
